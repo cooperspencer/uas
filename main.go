@@ -141,7 +141,7 @@ func main() {
 
 		fmt.Println("Searching for", chameleon.Lightblue(args[0]))
 
-		var re = regexp.MustCompile(fmt.Sprintf("(?m)%s", strings.ToUpper(args[0])))
+		var re= regexp.MustCompile(fmt.Sprintf("(?m)%s", strings.ToUpper(args[0])))
 
 		flatpakfile, err := ioutil.ReadFile(fmt.Sprintf("%s/flathub.json", repoPath))
 		if err != nil {
@@ -195,22 +195,26 @@ func main() {
 		}
 		appimage = Appimage{}
 
-		for i, f := range found {
-			fmt.Printf("#%d: %s %s\n", i, f.platform, chameleon.Lightgreen(f.name))
-		}
-
-		var choice int
-		fmt.Print("Select the number you'd like: ")
-		_, err = fmt.Scan(&choice)
-		if err != nil {
-			fmt.Println("Invalid choice!")
-			os.Exit(1)
+		if len(found) == 0 {
+			fmt.Println("Nothing found!")
 		} else {
-			if choice < len(found) {
-				fmt.Println(found[choice].url)
-			} else {
+			for i, f := range found {
+				fmt.Printf("#%d: %s %s\n", i, f.platform, chameleon.Lightgreen(f.name))
+			}
+
+			var choice int
+			fmt.Print("Select the number you'd like: ")
+			_, err = fmt.Scan(&choice)
+			if err != nil {
 				fmt.Println("Invalid choice!")
 				os.Exit(1)
+			} else {
+				if choice < len(found) {
+					fmt.Println(found[choice].url)
+				} else {
+					fmt.Println("Invalid choice!")
+					os.Exit(1)
+				}
 			}
 		}
 	}
