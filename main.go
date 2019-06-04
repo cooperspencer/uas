@@ -157,6 +157,7 @@ func main() {
 				found = append(found, Found{fmt.Sprintf("%s %s", flat.Name, flat.CurrentReleaseVersion), fmt.Sprintf("https://flathub.org/repo/upstream/%s", flat.FlatpakAppID), "flathub"})
 			}
 		}
+		flathub = Flatpak{}
 
 		snapcraftfile, err := ioutil.ReadFile(fmt.Sprintf("%s/snapcraft.json", repoPath))
 		if err != nil {
@@ -172,6 +173,7 @@ func main() {
 				found = append(found, Found{fmt.Sprintf("%s %s", snap.Name, snap.Version), snap.DownloadURL, "snapcraft"})
 			}
 		}
+		snapcraft = Snapcraft{}
 
 		appimagefile, err := ioutil.ReadFile(fmt.Sprintf("%s/appimage.json", repoPath))
 		if err != nil {
@@ -191,6 +193,7 @@ func main() {
 				}
 			}
 		}
+		appimage = Appimage{}
 
 		for i, f := range found {
 			fmt.Printf("#%d: %s %s\n", i, f.platform, chameleon.Lightgreen(f.name))
