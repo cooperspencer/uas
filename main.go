@@ -209,7 +209,7 @@ func main() {
 				fmt.Println("Invalid choice!")
 				os.Exit(1)
 			} else {
-				if choice < len(found) {
+				if choice < len(found) && choice >= 0 {
 					fmt.Println(found[choice].url)
 				} else {
 					fmt.Println("Invalid choice!")
