@@ -1,10 +1,11 @@
-# Ham
+# UAS
 
-ham searches Flathub, Snapcraft and AppImage for apps.
+uas searches Flathub, Snapcraft and AppImage for apps.
 
-copy ham to `/bin` and you can run it via `ham`.
+copy uas to `/bin` and you can run it via `uas`.
 
 For example: 
 ```
-ham firefox
+uas firefox
 ```
+To clear the cache of uas just run `uas -c`
