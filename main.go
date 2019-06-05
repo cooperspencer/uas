@@ -1,15 +1,18 @@
 package main
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
 	"gopkg.in/src-d/go-git.v4"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"regexp"
 	"strings"
 	"time"
 	"gitlab.com/buddyspencer/chameleon"
+	"gopkg.in/alecthomas/kingpin.v2"
 )
 
 type Flatpak []struct {
@@ -101,23 +104,69 @@ type Appimage struct {
 }
 
 type Found struct {
-	name     string
-	url      string
-	platform string
+	pkgname     string
+	confinement string
+	name        string
+	url         string
+	platform    string
 }
 
 var (
 	repoPath = "/tmp/.snap-repos"
 	repo     = "https://gitlab.com/buddyspencer/snap-repos"
 	found    = []Found{}
+
+	clear = kingpin.Flag("clear", "clear the cache").Short('c').Bool()
+	arg   = kingpin.Arg("program", "the program you are looking for").String()
 )
 
+func CheckIfCommandExists(command string) bool {
+	_, err := exec.LookPath(command)
+	if err != nil {
+		return false
+	}
+	return true
+}
+
+func RunCommand(command []string) {
+	c := "sudo"
+	cmd := exec.Command(c, command ...)
+
+	fmt.Println(cmd.Args)
+
+	outp, err := cmd.StdoutPipe()
+
+	if err != nil {
+		panic(err)
+	}
+
+	err = cmd.Start()
+	if err != nil {
+		panic(err)
+	}
+
+	scanner := bufio.NewScanner(outp)
+	for scanner.Scan() {
+		fmt.Println(scanner.Text())
+	}
+
+}
+
 func main() {
-	args := os.Args[1:]
-	if len(args) > 0 {
+	kingpin.Parse()
+	if *clear {
+		err := os.RemoveAll(repoPath)
+		if err != nil {
+			fmt.Println("couldn't clear cache.\n Please try to remove " + repoPath + " on your own.")
+			os.Exit(1)
+		}
+		fmt.Println("cleared cache")
+	}
+	if len(*arg) != 0 {
 		if _, err := os.Stat(repoPath); os.IsNotExist(err) {
 			_, err = git.PlainClone(repoPath, false, &git.CloneOptions{
-				URL: repo,
+				URL:   repo,
+				Depth: 0,
 			})
 			if err != nil {
 				panic(err)
@@ -139,9 +188,9 @@ func main() {
 			}
 		}
 
-		fmt.Println("Searching for", chameleon.Lightblue(args[0]))
+		fmt.Println("Searching for", chameleon.Lightblue(*arg))
 
-		var re= regexp.MustCompile(fmt.Sprintf("(?m)%s", strings.ToUpper(args[0])))
+		var re = regexp.MustCompile(fmt.Sprintf("(?m)%s", strings.ToUpper(*arg)))
 
 		flatpakfile, err := ioutil.ReadFile(fmt.Sprintf("%s/flathub.json", repoPath))
 		if err != nil {
@@ -154,7 +203,7 @@ func main() {
 		}
 		for _, flat := range flathub {
 			if len(re.FindAllString(strings.ToUpper(flat.Name), -1)) > 0 {
-				found = append(found, Found{fmt.Sprintf("%s %s", flat.Name, flat.CurrentReleaseVersion), fmt.Sprintf("https://flathub.org/repo/upstream/%s", flat.FlatpakAppID), "flathub"})
+				found = append(found, Found{flat.FlatpakAppID, "", fmt.Sprintf("%s %s", flat.Name, flat.CurrentReleaseVersion), fmt.Sprintf("https://flathub.org/repo/upstream/%s", flat.FlatpakAppID), "flathub"})
 			}
 		}
 		flathub = Flatpak{}
@@ -170,7 +219,7 @@ func main() {
 		}
 		for _, snap := range snapcraft.Embedded.ClickindexPackage {
 			if len(re.FindAllString(strings.ToUpper(snap.Name), -1)) > 0 {
-				found = append(found, Found{fmt.Sprintf("%s %s", snap.Name, snap.Version), snap.DownloadURL, "snapcraft"})
+				found = append(found, Found{snap.PackageName, snap.Confinement, fmt.Sprintf("%s %s", snap.Name, snap.Version), snap.DownloadURL, "snapcraft"})
 			}
 		}
 		snapcraft = Snapcraft{}
@@ -188,7 +237,7 @@ func main() {
 			if len(re.FindAllString(strings.ToUpper(app.Name), -1)) > 0 {
 				for _, link := range app.Links {
 					if link.Type == "Download" {
-						found = append(found, Found{fmt.Sprintf("%s", app.Name), link.URL, "appimage"})
+						found = append(found, Found{app.Name, "", app.Name, link.URL, "appimage"})
 					}
 				}
 			}
@@ -210,12 +259,36 @@ func main() {
 				os.Exit(1)
 			} else {
 				if choice < len(found) && choice >= 0 {
-					fmt.Println(found[choice].url)
+					switch found[choice].platform {
+					case "snapcraft":
+						if CheckIfCommandExists("snap") {
+							confinement := ""
+							if len(found[choice].confinement) > 0 {
+								confinement =fmt.Sprintf("--%s", found[choice].confinement)
+							}
+							RunCommand([]string{"snap", "install", found[choice].pkgname, confinement})
+						} else {
+							fmt.Println("Please install snap")
+							os.Exit(1)
+						}
+					case "flathub":
+						if CheckIfCommandExists("flatpak") {
+							RunCommand([]string{"flatpak", "install", "-y", "flathub", found[choice].pkgname})
+						} else {
+							fmt.Println("Please install flatpak")
+							os.Exit(1)
+						}
+					default:
+						fmt.Println(found[choice].url)
+					}
 				} else {
 					fmt.Println("Invalid choice!")
 					os.Exit(1)
 				}
 			}
 		}
+	}
+	if len(*arg) == 0 && !*clear {
+		fmt.Println("Please use the --help command")
 	}
 }
