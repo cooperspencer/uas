@@ -13,6 +13,7 @@ import (
 	"time"
 	"gitlab.com/buddyspencer/chameleon"
 	"gopkg.in/alecthomas/kingpin.v2"
+	"github.com/imroc/req"
 )
 
 type Flatpak []struct {
@@ -236,7 +237,7 @@ func main() {
 		for _, app := range appimage.Items {
 			if len(re.FindAllString(strings.ToUpper(app.Name), -1)) > 0 {
 				for _, link := range app.Links {
-					if link.Type == "Download" {
+					if link.Type == "uas" {
 						found = append(found, Found{app.Name, "", app.Name, link.URL, "appimage"})
 					}
 				}
@@ -276,6 +277,36 @@ func main() {
 							RunCommand([]string{"flatpak", "install", "-y", "flathub", found[choice].pkgname})
 						} else {
 							fmt.Println("Please install flatpak")
+							os.Exit(1)
+						}
+					case "appimage":
+						home, err := os.UserHomeDir()
+						if err != nil {
+							panic(err)
+						}
+						appimage_dir := fmt.Sprintf("%s/.appimage", home)
+						if _, err = os.Stat(appimage_dir); os.IsNotExist(err) {
+							err = os.MkdirAll(appimage_dir, 0700)
+							if err != nil {
+								fmt.Println("could not create " + appimage_dir + ".")
+								os.Exit(1)
+							}
+						}
+						r, err := req.Get(found[choice].url)
+						if err != nil {
+							fmt.Println("could not download", found[choice].url)
+							os.Exit(1)
+						}
+						splittedLink := strings.Split(found[choice].url, "/")
+						filename := fmt.Sprintf("%s/%s", appimage_dir, splittedLink[len(splittedLink) - 1])
+						err = r.ToFile(filename)
+						if err != nil {
+							fmt.Println("could not save file.")
+							os.Exit(1)
+						}
+						err = os.Chmod(filename, 0775)
+						if err != nil {
+							fmt.Println("could not set permissions on ", filename)
 							os.Exit(1)
 						}
 					default:

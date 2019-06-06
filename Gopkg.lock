@@ -36,6 +36,14 @@
   version = "v1.12.0"
 
 [[projects]]
+  digest = "1:3fb51807ab996acf337a6372ac98e093e17f14d75edbf2c0d27f650e53d90fac"
+  name = "github.com/imroc/req"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "b355b6f6842fbda1bee879f2846cb79424cad4de"
+  version = "v0.2.3"
+
+[[projects]]
   branch = "master"
   digest = "1:62fe3a7ea2050ecbd753a71889026f83d73329337ada66325cbafd5dea5f713d"
   name = "github.com/jbenet/go-context"
@@ -232,6 +240,7 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/imroc/req",
     "gitlab.com/buddyspencer/chameleon",
     "gopkg.in/alecthomas/kingpin.v2",
     "gopkg.in/src-d/go-git.v4",
