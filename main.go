@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 	"gitlab.com/buddyspencer/chameleon"
@@ -249,16 +250,28 @@ func main() {
 			fmt.Println("Nothing found!")
 		} else {
 			for i, f := range found {
-				fmt.Printf("#%d: %s %s\n", i, f.platform, chameleon.Lightgreen(f.name))
+				fmt.Printf("#%d: %s %s\n", i+1, f.platform, chameleon.Lightgreen(f.name))
 			}
 
-			var choice int
-			fmt.Print("Select the number you'd like: ")
-			_, err = fmt.Scan(&choice)
+			var choice_s string
+			fmt.Print("Select the number you'd like or 'q' to quit: ")
+			_, err = fmt.Scan(&choice_s)
 			if err != nil {
 				fmt.Println("Invalid choice!")
 				os.Exit(1)
 			} else {
+				if choice_s == "q" {
+					fmt.Println("Quitting")
+					os.Exit(0)
+				}
+
+				choice, err := strconv.Atoi(choice_s)
+				if err != nil {
+					fmt.Println("Invalid choice!")
+					os.Exit(1)
+				}
+				choice--
+
 				if choice < len(found) && choice >= 0 {
 					switch found[choice].platform {
 					case "snapcraft":
