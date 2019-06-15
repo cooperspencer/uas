@@ -15,6 +15,7 @@ import (
 	"gitlab.com/buddyspencer/chameleon"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"github.com/imroc/req"
+	"gopkg.in/cheggaaa/pb.v1"
 )
 
 type Flatpak []struct {
@@ -298,14 +299,29 @@ func main() {
 							panic(err)
 						}
 						appimage_dir := fmt.Sprintf("%s/.appimage", home)
+						fmt.Println("saving to", appimage_dir)
 						if _, err = os.Stat(appimage_dir); os.IsNotExist(err) {
 							err = os.MkdirAll(appimage_dir, 0700)
+							fmt.Printf("%s not found. Trying to create it.\n", appimage_dir)
 							if err != nil {
 								fmt.Println("could not create " + appimage_dir + ".")
 								os.Exit(1)
 							}
+							fmt.Println("Created it.")
 						}
-						r, err := req.Get(found[choice].url)
+
+						var bar *pb.ProgressBar
+						var started bool
+						progress := func(current, total int64) {
+							if !started {
+								bar = pb.New(int(total)).SetUnits(pb.U_BYTES)
+								bar.Start()
+								started = true
+							}
+							bar.Set(int(current))
+						}
+
+						r, err := req.Get(found[choice].url, req.DownloadProgress(progress))
 						if err != nil {
 							fmt.Println("could not download", found[choice].url)
 							os.Exit(1)
@@ -317,11 +333,13 @@ func main() {
 							fmt.Println("could not save file.")
 							os.Exit(1)
 						}
+						fmt.Printf("Downloaded %s\n", filename)
 						err = os.Chmod(filename, 0775)
 						if err != nil {
 							fmt.Println("could not set permissions on ", filename)
 							os.Exit(1)
 						}
+						fmt.Printf("Set execute permission on %s\n", filename)
 					default:
 						fmt.Println(found[choice].url)
 					}

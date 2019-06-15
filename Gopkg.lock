@@ -60,6 +60,14 @@
   version = "0.5"
 
 [[projects]]
+  digest = "1:0356f3312c9bd1cbeda81505b7fd437501d8e778ab66998ef69f00d7f9b3a0d7"
+  name = "github.com/mattn/go-runewidth"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "3ee7d812e62a0804a7d0a324e0249ca2db3476d3"
+  version = "v0.0.4"
+
+[[projects]]
   digest = "1:5d231480e1c64a726869bc4142d270184c419749d34f167646baa21008eb0a79"
   name = "github.com/mitchellh/go-homedir"
   packages = ["."]
@@ -147,10 +155,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:f2d47aafbf1de5b233475a11c7cf71bb8dbcb39ef864afa41445833556901dc7"
+  digest = "1:94f3c016b859b321c6279d2c9becd7835b4b50efad7f70a2cf53347ec876af2c"
   name = "golang.org/x/sys"
   packages = [
     "cpu",
+    "unix",
     "windows",
   ]
   pruneopts = "UT"
@@ -163,6 +172,14 @@
   pruneopts = "UT"
   revision = "947dcec5ba9c011838740e680966fd7087a71d0d"
   version = "v2.2.6"
+
+[[projects]]
+  digest = "1:d219400f09c151f0ada918bab650ef46f7ebdb1ff4fea923fdcb839481ec7ec1"
+  name = "gopkg.in/cheggaaa/pb.v1"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "f907f6f5dd81f77c2bbc1cde92e4c5a04720cb11"
+  version = "v1.0.28"
 
 [[projects]]
   digest = "1:866df945fc92cd221d2b384dca7de5f3131a6113b9f72a7a8019ae5046abe828"
@@ -243,6 +260,7 @@
     "github.com/imroc/req",
     "gitlab.com/buddyspencer/chameleon",
     "gopkg.in/alecthomas/kingpin.v2",
+    "gopkg.in/cheggaaa/pb.v1",
     "gopkg.in/src-d/go-git.v4",
   ]
   solver-name = "gps-cdcl"
