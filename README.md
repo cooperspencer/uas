@@ -8,4 +8,7 @@ For example:
 ```
 uas firefox
 ```
+
 To clear the cache of uas just run `uas -c`
+
+To update the apps run `uas -u`
