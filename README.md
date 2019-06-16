@@ -8,6 +8,8 @@ For example:
 ```
 uas firefox
 ```
+You get a selection of the different stores apps which contain firefox. Just make your choice and the installation should start.
+
 
 To clear the cache of uas just run `uas -c`
 
