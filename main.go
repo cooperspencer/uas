@@ -21,7 +21,7 @@ type Found struct {
 
 var (
 	repoPath = "/tmp/.snap-repos"
-	repo     = "https://gitlab.com/buddyspencer/snap-repos"
+	repo     = "https://github.com/cooperspencer/snap-repos"
 	found    = []Found{}
 
 	re *regexp.Regexp
